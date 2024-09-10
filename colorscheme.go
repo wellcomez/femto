@@ -1,7 +1,7 @@
 package femto
 
 import (
-	"fmt"
+	// "fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -93,7 +93,7 @@ func ParseColorscheme(text string) Colorscheme {
 				defStyle = style
 			}
 		} else {
-			fmt.Println("Color-link statement is not valid:", line)
+			// fmt.Println("Color-link statement is not valid:", line)
 		}
 	}
 

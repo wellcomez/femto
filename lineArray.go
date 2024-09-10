@@ -3,7 +3,6 @@ package femto
 import (
 	"bufio"
 	"io"
-	"log"
 	"unicode/utf8"
 
 	highlight "zen108.com/lspvi/pkg/highlight"
