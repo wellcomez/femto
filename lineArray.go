@@ -3,9 +3,10 @@ package femto
 import (
 	"bufio"
 	"io"
+	"log"
 	"unicode/utf8"
 
-	"github.com/zyedidia/micro/cmd/micro/highlight"
+	highlight "zen108.com/lspvi/pkg/highlight"
 )
 
 func runeToByteIndex(n int, txt []byte) int {

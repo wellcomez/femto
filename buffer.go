@@ -6,7 +6,9 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/zyedidia/micro/cmd/micro/highlight"
+	highlight "zen108.com/lspvi/pkg/highlight"
+	lspcore "zen108.com/lspvi/pkg/lsp"
+	//"github.com/zyedidia/micro/cmd/micro/highlight"
 )
 
 const LargeFileThreshold = 50000
@@ -111,13 +113,14 @@ func (b *Buffer) GetName() string {
 
 // updateRules updates the syntax rules and filetype for this buffer
 // This is called when the colorscheme changes
-func (b *Buffer) updateRules(runtimeFiles *RuntimeFiles) {
+func (b *Buffer) updateRules(runtimeFiles *RuntimeFiles, colorScheme *Colorscheme) {
 	if runtimeFiles == nil {
 		return
 	}
 
 	rehighlight := false
 	var files []*highlight.File
+	var tree *lspcore.TreeSitter = lspcore.NewTreeSitter(b.Path)
 	for _, f := range runtimeFiles.ListRuntimeFiles(RTSyntax) {
 		data, err := f.Data()
 		if err == nil {
@@ -161,12 +164,24 @@ func (b *Buffer) updateRules(runtimeFiles *RuntimeFiles) {
 	if b.syntaxDef != nil {
 		highlight.ResolveIncludes(b.syntaxDef, files)
 	}
+	if colorScheme!= nil {
+		colors := []string{}
+		for c, _ := range *colorScheme{
+			colors = append(colors, c)
+		}
+		highlight.AddColoreTheme(colors)
+	}
 
 	if b.highlighter == nil || rehighlight {
 		if b.syntaxDef != nil {
 			b.Settings["filetype"] = b.syntaxDef.FileType
 			b.highlighter = highlight.NewHighlighter(b.syntaxDef)
-			if b.Settings["syntax"].(bool) {
+			if tree != nil {
+				if err := tree.Init(); err == nil {
+					b.highlighter.Tree = tree
+				}
+			}
+			if b.Settings["syntax"].(bool) || b.highlighter != nil {
 				b.highlighter.HighlightStates(b)
 			}
 		}

@@ -113,13 +113,13 @@ func (v *View) SetKeybindings(bindings KeyBindings) {
 // SetColorscheme sets the colorscheme for this view.
 func (v *View) SetColorscheme(colorscheme Colorscheme) {
 	v.colorscheme = colorscheme
-	v.Buf.updateRules(v.runtimeFiles)
+	v.Buf.updateRules(v.runtimeFiles,&colorscheme)
 }
 
 // SetRuntimeFiles sets the runtime files for this view.
 func (v *View) SetRuntimeFiles(runtimeFiles *RuntimeFiles) {
 	v.runtimeFiles = runtimeFiles
-	v.Buf.updateRules(v.runtimeFiles)
+	v.Buf.updateRules(v.runtimeFiles,nil)
 }
 
 func (v *View) paste(clip string) {
