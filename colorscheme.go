@@ -89,7 +89,7 @@ func ParseColorscheme(text string) Colorscheme {
 			style := StringToStyle(colors)
 			c[link] = style
 
-			if link == "default" {
+			if link == "default" || link == "normal" {
 				defStyle = style
 			}
 		} else {
