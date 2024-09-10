@@ -113,13 +113,13 @@ func (v *View) SetKeybindings(bindings KeyBindings) {
 // SetColorscheme sets the colorscheme for this view.
 func (v *View) SetColorscheme(colorscheme Colorscheme) {
 	v.colorscheme = colorscheme
-	v.Buf.updateRules(v.runtimeFiles,&colorscheme)
+	v.Buf.updateRules(v.runtimeFiles, &colorscheme)
 }
 
 // SetRuntimeFiles sets the runtime files for this view.
 func (v *View) SetRuntimeFiles(runtimeFiles *RuntimeFiles) {
 	v.runtimeFiles = runtimeFiles
-	v.Buf.updateRules(v.runtimeFiles,nil)
+	v.Buf.updateRules(v.runtimeFiles, nil)
 }
 
 func (v *View) paste(clip string) {
@@ -174,6 +174,29 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	// Set isOverwriteMode to false, because we assume we are in the default mode when editor
 	// is opened
 	v.isOverwriteMode = false
+}
+func (v *View) VirtualLine(lineoffset, X int) int {
+	add := 0
+	linecout := 0
+	for lineN := v.Topline; lineN <= v.Topline+lineoffset; lineN++ {
+		line := v.Buf.Line(lineN)
+		n := len(line) / v.width
+		_mod := len(line) % v.width
+		if _mod != 0 {
+			n++
+		} else if len(line) == 0 {
+			n = 1
+		}
+		if n > 1 {
+			add = add + n - 1
+		}
+		linecout += n
+		if linecout >= lineoffset {
+			break
+		}
+
+	}
+	return add
 }
 
 // Bottomline returns the line number of the lowest line in the view

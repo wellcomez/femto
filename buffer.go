@@ -316,7 +316,8 @@ func (b *Buffer) LineBytes(n int) []byte {
 
 // LineRunes returns a single line as an array of runes
 func (b *Buffer) LineRunes(n int) []rune {
-	if n >= len(b.lines) {
+	//overflow
+	if n >= len(b.lines) ||n<0 {
 		return []rune{}
 	}
 	return toRunes(b.lines[n].data)
@@ -324,7 +325,8 @@ func (b *Buffer) LineRunes(n int) []rune {
 
 // Line returns a single line
 func (b *Buffer) Line(n int) string {
-	if n >= len(b.lines) {
+	//overflow
+	if n >= len(b.lines) ||n<0 {
 		return ""
 	}
 	return string(b.lines[n].data)
