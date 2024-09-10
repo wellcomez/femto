@@ -759,6 +759,10 @@ func (v *View) JumpToMatchingBrace() bool {
 		r := v.Cursor.RuneUnder(v.Cursor.X)
 		if r == bp[0] || r == bp[1] {
 			matchingBrace := v.Buf.FindMatchingBrace(bp, v.Cursor.Loc)
+			if matchingBrace.Y < v.Topline || matchingBrace.Y > v.Bottomline() {
+				v.Topline = Max(0, matchingBrace.Y-(v.height/2))
+				return true
+			}
 			v.Cursor.GotoLoc(matchingBrace)
 		}
 	}
