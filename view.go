@@ -175,10 +175,12 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	// is opened
 	v.isOverwriteMode = false
 }
-func (v *View) VirtualLine(lineoffset, X int) int {
-	add := 0
-	linecout := 0
-	for lineN := v.Topline; lineN <= v.Topline+lineoffset; lineN++ {
+func (v *View) VirtualLine(lineoffset, posX int) (int, int) {
+	// add := 0
+	lineN := v.Topline
+	line_begin := v.Topline
+	break_loop := false
+	for ; ; lineN++ {
 		line := v.Buf.Line(lineN)
 		n := len(line) / v.width
 		_mod := len(line) % v.width
@@ -187,16 +189,14 @@ func (v *View) VirtualLine(lineoffset, X int) int {
 		} else if len(line) == 0 {
 			n = 1
 		}
-		if n > 1 {
-			add = add + n - 1
-		}
-		linecout += n
-		if linecout >= lineoffset {
+		line_begin += n
+		break_loop = line_begin > lineoffset
+		if break_loop {
+			posX += v.width * (n - 1)
 			break
 		}
-
 	}
-	return add
+	return posX, lineN
 }
 
 // Bottomline returns the line number of the lowest line in the view
