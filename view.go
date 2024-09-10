@@ -175,28 +175,39 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	// is opened
 	v.isOverwriteMode = false
 }
-func (v *View) VirtualLine(lineoffset, posX int) (int, int) {
+func (v *View) VirtualLine(click_line_y, click_line_x int) (int, int) {
 	// add := 0
+	width := v.width - v.lineNumOffset
+	drawe_line := v.Topline
 	lineN := v.Topline
-	line_begin := v.Topline
-	break_loop := false
-	for ; ; lineN++ {
-		line := v.Buf.Line(lineN)
-		n := len(line) / v.width
-		_mod := len(line) % v.width
+	for ; lineN <= v.Bottomline(); lineN++ {
+		line := v.Buf.buf.Line(lineN)
+		string_length := len(line)
+		for _, s := range line {
+			if s=='\t'	{
+				string_length+= int(v.Buf.Settings["tabsize"].(float64)) - 1
+			}else{
+				break
+			}
+		}
+		n := string_length / width
+		_mod := string_length % width
 		if _mod != 0 {
 			n++
 		} else if len(line) == 0 {
 			n = 1
 		}
-		line_begin += n
-		break_loop = line_begin > lineoffset
-		if break_loop {
-			posX += v.width * (n - 1)
-			break
+		sub_end := drawe_line + n
+		j := 0
+		for ; drawe_line < sub_end; drawe_line++ {
+			if drawe_line == click_line_y {
+				click_line_x += j * width
+				return click_line_x, lineN
+			}
+			j++
 		}
 	}
-	return posX, lineN
+	return click_line_x, lineN
 }
 
 // Bottomline returns the line number of the lowest line in the view
