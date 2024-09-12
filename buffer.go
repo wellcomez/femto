@@ -164,26 +164,35 @@ func (b *Buffer) updateRules(runtimeFiles *RuntimeFiles, colorScheme *Colorschem
 	if b.syntaxDef != nil {
 		highlight.ResolveIncludes(b.syntaxDef, files)
 	}
-	if colorScheme!= nil {
+	if colorScheme != nil {
 		colors := []string{}
-		for c, _ := range *colorScheme{
+		for c, _ := range *colorScheme {
 			colors = append(colors, c)
 		}
 		highlight.AddColoreTheme(colors)
 	}
-
+	tsok := false
+	if tree != nil {
+		if err := tree.Init(); err == nil {
+			tsok = true
+			// b.highlighter.Tree = tree
+		}
+	}
 	if b.highlighter == nil || rehighlight {
 		if b.syntaxDef != nil {
 			b.Settings["filetype"] = b.syntaxDef.FileType
 			b.highlighter = highlight.NewHighlighter(b.syntaxDef)
-			if tree != nil {
-				if err := tree.Init(); err == nil {
-					b.highlighter.Tree = tree
-				}
+			if tsok {
+				b.highlighter.Tree = tree
 			}
 			if b.Settings["syntax"].(bool) || b.highlighter != nil {
 				b.highlighter.HighlightStates(b)
 			}
+		}
+		if b.highlighter == nil && tsok {
+			b.highlighter = highlight.NewHighlighter(nil)
+			b.highlighter.Tree = tree
+			b.highlighter.HighlightStates(b)
 		}
 	}
 }
@@ -317,7 +326,7 @@ func (b *Buffer) LineBytes(n int) []byte {
 // LineRunes returns a single line as an array of runes
 func (b *Buffer) LineRunes(n int) []rune {
 	//overflow
-	if n >= len(b.lines) ||n<0 {
+	if n >= len(b.lines) || n < 0 {
 		return []rune{}
 	}
 	return toRunes(b.lines[n].data)
@@ -326,7 +335,7 @@ func (b *Buffer) LineRunes(n int) []rune {
 // Line returns a single line
 func (b *Buffer) Line(n int) string {
 	//overflow
-	if n >= len(b.lines) ||n<0 {
+	if n >= len(b.lines) || n < 0 {
 		return ""
 	}
 	return string(b.lines[n].data)
