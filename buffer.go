@@ -113,7 +113,7 @@ func (b *Buffer) GetName() string {
 
 // updateRules updates the syntax rules and filetype for this buffer
 // This is called when the colorscheme changes
-func (b *Buffer) updateRules(runtimeFiles *RuntimeFiles, colorScheme *Colorscheme) {
+func (b *Buffer) updateRules(runtimeFiles *RuntimeFiles, colorScheme *Colorscheme, cb func()) {
 	if runtimeFiles == nil {
 		return
 	}
@@ -173,7 +173,7 @@ func (b *Buffer) updateRules(runtimeFiles *RuntimeFiles, colorScheme *Colorschem
 	}
 	tsok := false
 	if tree != nil {
-		if err := tree.Init(); err == nil {
+		if err := tree.Init(cb); err == nil {
 			tsok = true
 			// b.highlighter.Tree = tree
 		}

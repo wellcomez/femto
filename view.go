@@ -111,15 +111,15 @@ func (v *View) SetKeybindings(bindings KeyBindings) {
 }
 
 // SetColorscheme sets the colorscheme for this view.
-func (v *View) SetColorscheme(colorscheme Colorscheme) {
+func (v *View) SetColorscheme(colorscheme Colorscheme, cb func()) {
 	v.colorscheme = colorscheme
-	v.Buf.updateRules(v.runtimeFiles, &colorscheme)
+	v.Buf.updateRules(v.runtimeFiles, &colorscheme, cb)
 }
 
 // SetRuntimeFiles sets the runtime files for this view.
 func (v *View) SetRuntimeFiles(runtimeFiles *RuntimeFiles) {
 	v.runtimeFiles = runtimeFiles
-	v.Buf.updateRules(v.runtimeFiles, nil)
+	v.Buf.updateRules(v.runtimeFiles, nil, nil)
 }
 
 func (v *View) paste(clip string) {
@@ -184,9 +184,9 @@ func (v *View) VirtualLine(click_line_y, click_line_x int) (int, int) {
 		line := v.Buf.buf.Line(lineN)
 		string_length := len(line)
 		for _, s := range line {
-			if s=='\t'	{
-				string_length+= int(v.Buf.Settings["tabsize"].(float64)) - 1
-			}else{
+			if s == '\t' {
+				string_length += int(v.Buf.Settings["tabsize"].(float64)) - 1
+			} else {
 				break
 			}
 		}
