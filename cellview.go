@@ -99,7 +99,7 @@ func (c *CellView) Draw(buf *Buffer, colorscheme Colorscheme, top, height, left,
 	indentchar := indentrunes[0]
 
 	start := buf.Cursor.Y
-	if buf.Settings["syntax"].(bool) && (buf.syntaxDef != nil || buf.highlighter.Tree != nil) {
+	if buf.Settings["syntax"].(bool) && (buf.syntaxDef != nil || (buf.highlighter != nil && buf.highlighter.Tree != nil)) {
 		if start > 0 && buf.lines[start-1].rehighlight {
 			buf.highlighter.ReHighlightLine(buf, start-1)
 			buf.lines[start-1].rehighlight = false
