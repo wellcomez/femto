@@ -7,7 +7,6 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
-	lspcore "zen108.com/lspvi/pkg/lsp"
 )
 
 // The View struct stores information about a view into a buffer.
@@ -112,15 +111,15 @@ func (v *View) SetKeybindings(bindings KeyBindings) {
 }
 
 // SetColorscheme sets the colorscheme for this view.
-func (v *View) SetColorscheme(colorscheme Colorscheme, cb func(*lspcore.TreeSitter)) {
+func (v *View) SetColorscheme(colorscheme Colorscheme) {
 	v.colorscheme = colorscheme
-	v.Buf.updateRules(v.runtimeFiles, &colorscheme, cb)
+	v.Buf.updateRules(v.runtimeFiles, &colorscheme)
 }
 
 // SetRuntimeFiles sets the runtime files for this view.
 func (v *View) SetRuntimeFiles(runtimeFiles *RuntimeFiles) {
 	v.runtimeFiles = runtimeFiles
-	v.Buf.updateRules(v.runtimeFiles, nil, nil)
+	v.Buf.updateRules(v.runtimeFiles, nil)
 }
 
 func (v *View) paste(clip string) {

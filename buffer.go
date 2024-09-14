@@ -53,6 +53,11 @@ type Buffer struct {
 
 	// Buffer local settings
 	Settings map[string]interface{}
+	tree     *lspcore.TreeSitter
+}
+
+func (b *Buffer) SetTreesitter(tree *lspcore.TreeSitter) {
+	b.tree = tree
 }
 
 // NewBufferFromString creates a new buffer containing the given string
@@ -113,14 +118,14 @@ func (b *Buffer) GetName() string {
 
 // updateRules updates the syntax rules and filetype for this buffer
 // This is called when the colorscheme changes
-func (b *Buffer) updateRules(runtimeFiles *RuntimeFiles, colorScheme *Colorscheme, cb func(*lspcore.TreeSitter)) {
+func (b *Buffer) updateRules(runtimeFiles *RuntimeFiles, colorScheme *Colorscheme) {
 	if runtimeFiles == nil {
 		return
 	}
 
 	rehighlight := false
 	var files []*highlight.File
-	var tree *lspcore.TreeSitter = lspcore.NewTreeSitter(b.Path)
+	// var tree *lspcore.TreeSitter = lspcore.GetNewTreeSitter(b.Path)
 	for _, f := range runtimeFiles.ListRuntimeFiles(RTSyntax) {
 		data, err := f.Data()
 		if err == nil {
@@ -171,25 +176,19 @@ func (b *Buffer) updateRules(runtimeFiles *RuntimeFiles, colorScheme *Colorschem
 		}
 		highlight.AddColoreTheme(colors)
 	}
-	tsok := false
-	if tree != nil {
-		if err := tree.Init(cb); err == nil {
-			tsok = true
-			// b.highlighter.Tree = tree
-		}
-	}
+	tree := b.tree
 	if b.highlighter == nil || rehighlight {
 		if b.syntaxDef != nil {
 			b.Settings["filetype"] = b.syntaxDef.FileType
 			b.highlighter = highlight.NewHighlighter(b.syntaxDef)
-			if tsok {
+			if tree != nil {
 				b.highlighter.Tree = tree
 			}
 			if b.Settings["syntax"].(bool) || b.highlighter != nil {
 				b.highlighter.HighlightStates(b)
 			}
 		}
-		if b.highlighter == nil && tsok {
+		if b.highlighter == nil && tree != nil {
 			b.highlighter = highlight.NewHighlighter(nil)
 			b.highlighter.Tree = tree
 			b.highlighter.HighlightStates(b)
