@@ -175,6 +175,28 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	// is opened
 	v.isOverwriteMode = false
 }
+func (v *View) GetLineNoFormDraw(Y int) int {
+	if !v.Buf.Settings["softwrap"].(bool) {
+		return Y
+	}
+	width := v.width - v.lineNumOffset
+	EndLine := min(v.Bottomline(), Y)
+	ret := v.Topline
+	for lineN := v.Topline; lineN < EndLine-1; lineN++ {
+		line := v.Buf.buf.Line(lineN)
+		string_length := len(line)
+		for _, s := range line {
+			if s == '\t' {
+				string_length += int(v.Buf.Settings["tabsize"].(float64)) - 1
+			} else {
+				break
+			}
+		}
+		n := string_length / width
+		ret += n
+	}
+	return Y+ret
+}
 func (v *View) VirtualLine(click_line_y, click_line_x int) (int, int) {
 	// add := 0
 	width := v.width - v.lineNumOffset
