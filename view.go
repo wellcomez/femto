@@ -202,7 +202,8 @@ func (v *View) VirtualLine(click_line_y, click_line_x int) (int, int) {
 	width := v.width - v.lineNumOffset
 	drawe_line := v.Topline
 	lineN := v.Topline
-	for ; lineN <= v.Bottomline(); lineN++ {
+	x := v.Bottomline()
+	for ; lineN <= x; lineN++ {
 		line := v.Buf.buf.Line(lineN)
 		string_length := len(line)
 		for _, s := range line {
@@ -243,7 +244,8 @@ func (v *View) Bottomline() int {
 
 	screenX, screenY := 0, 0
 	numLines := 0
-	for lineN := v.Topline; lineN < v.Topline+v.height; lineN++ {
+	MaxLine := min(v.Buf.NumLines-1, v.Topline + v.height)
+	for lineN := v.Topline; lineN < MaxLine; lineN++ {
 		line := v.Buf.Line(lineN)
 
 		colN := 0
