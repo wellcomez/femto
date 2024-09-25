@@ -1,6 +1,8 @@
 package femto
 
 import (
+	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -113,13 +115,13 @@ func (v *View) SetKeybindings(bindings KeyBindings) {
 // SetColorscheme sets the colorscheme for this view.
 func (v *View) SetColorscheme(colorscheme Colorscheme) {
 	v.colorscheme = colorscheme
-	v.Buf.updateRules(v.runtimeFiles)
+	v.Buf.updateRules(v.runtimeFiles, &colorscheme)
 }
 
 // SetRuntimeFiles sets the runtime files for this view.
 func (v *View) SetRuntimeFiles(runtimeFiles *RuntimeFiles) {
 	v.runtimeFiles = runtimeFiles
-	v.Buf.updateRules(v.runtimeFiles)
+	v.Buf.updateRules(v.runtimeFiles, nil)
 }
 
 func (v *View) paste(clip string) {
@@ -175,6 +177,66 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	// is opened
 	v.isOverwriteMode = false
 }
+func (v *View) GetLineNoFormDraw(Y int) int {
+	if !v.Buf.Settings["softwrap"].(bool) {
+		return Y
+	}
+	width := v.width - v.lineNumOffset
+	EndLine := min(v.Bottomline(), Y)
+	ret := 0
+	for lineN := v.Topline; lineN < EndLine-1; lineN++ {
+		line := v.Buf.buf.Line(lineN)
+		string_length := len(line)
+		for _, s := range line {
+			if s == '\t' {
+				string_length += int(v.Buf.Settings["tabsize"].(float64)) - 1
+			} else {
+				break
+			}
+		}
+		n := 0
+		if string_length > width {
+			n = string_length / width
+		}
+		ret += n
+	}
+	return Y + ret
+}
+func (v *View) VirtualLine(click_line_y, click_line_x int) (int, int) {
+	// add := 0
+	width := v.width - v.lineNumOffset
+	drawe_line := v.Topline
+	lineN := v.Topline
+	x := v.Bottomline()
+	for ; lineN <= x; lineN++ {
+		line := v.Buf.buf.Line(lineN)
+		string_length := len(line)
+		for _, s := range line {
+			if s == '\t' {
+				string_length += int(v.Buf.Settings["tabsize"].(float64)) - 1
+			} else {
+				break
+			}
+		}
+		n := string_length / width
+		_mod := string_length % width
+		if _mod != 0 {
+			n++
+		} else if len(line) == 0 {
+			n = 1
+		}
+		sub_end := drawe_line + n
+		j := 0
+		for ; drawe_line < sub_end; drawe_line++ {
+			if drawe_line == click_line_y {
+				click_line_x += j * width
+				return click_line_x, lineN
+			}
+			j++
+		}
+	}
+	return click_line_x, lineN
+}
 
 // Bottomline returns the line number of the lowest line in the view
 // You might think that this is obviously just v.Topline + v.height
@@ -187,7 +249,8 @@ func (v *View) Bottomline() int {
 
 	screenX, screenY := 0, 0
 	numLines := 0
-	for lineN := v.Topline; lineN < v.Topline+v.height; lineN++ {
+	MaxLine := min(v.Buf.NumLines-1, v.Topline+v.height)
+	for lineN := v.Topline; lineN < MaxLine; lineN++ {
 		line := v.Buf.Line(lineN)
 
 		colN := 0
@@ -425,8 +488,16 @@ func (v *View) displayView(screen tcell.Screen) {
 				lineNumStyle = style
 			}
 			if style, ok := v.colorscheme["current-line-number"]; ok {
-				if realLineN == v.Cursor.Y && !v.Cursor.HasSelection() {
-					lineNumStyle = style
+				if realLineN == v.Cursor.Y {
+					no := !v.Cursor.HasSelection()
+					if no {
+						if v.Cursor.CurSelection[0].Y == v.Cursor.CurSelection[1].Y {
+							no = false
+						}
+					}
+					if !no {
+						lineNumStyle = style
+					}
 				}
 			}
 
@@ -505,6 +576,7 @@ func (v *View) displayView(screen tcell.Screen) {
 				v.SetCursor(&v.Buf.Cursor)
 
 				lastChar = char
+
 			}
 		}
 
@@ -549,6 +621,7 @@ func (v *View) displayView(screen tcell.Screen) {
 			if style, ok := v.colorscheme["selection"]; ok {
 				selectStyle = style
 			}
+			log.Println("selection ", xOffset+visualLoc.X, yOffset+visualLoc.Y, ' ', selectStyle)
 			screen.SetContent(xOffset+visualLoc.X, yOffset+visualLoc.Y, ' ', nil, selectStyle)
 		}
 
@@ -560,6 +633,8 @@ func (v *View) displayView(screen tcell.Screen) {
 				style = style.Background(fg)
 				if !(!v.Cursor.HasSelection() && i == cx && yOffset+visualLineN == cy) {
 					screen.SetContent(i, yOffset+visualLineN, ' ', nil, style)
+					f, g, _ := style.Decompose()
+					log.Println("current-line", i, yOffset+visualLineN, style, fmt.Sprintf("#%d #%d", f, g))
 				}
 			}
 		}

@@ -99,7 +99,7 @@ func (c *CellView) Draw(buf *Buffer, colorscheme Colorscheme, top, height, left,
 	indentchar := indentrunes[0]
 
 	start := buf.Cursor.Y
-	if buf.Settings["syntax"].(bool) && buf.syntaxDef != nil {
+	if buf.Settings["syntax"].(bool) && (buf.syntaxDef != nil || (buf.highlighter != nil && buf.highlighter.Tree != nil)) {
 		if start > 0 && buf.lines[start-1].rehighlight {
 			buf.highlighter.ReHighlightLine(buf, start-1)
 			buf.lines[start-1].rehighlight = false
@@ -137,7 +137,12 @@ func (c *CellView) Draw(buf *Buffer, colorscheme Colorscheme, top, height, left,
 		// whichever is smaller
 		lineLength := min(StringWidth(lineStr, tabsize), width)
 		c.lines = append(c.lines, make([]*Char, lineLength))
-
+		// if viewLine >= len(c.lines){
+		// 	break
+		// }
+		// if viewCol>=len(c.lines[viewLine]){
+		// 	break
+		// }
 		wrap := false
 		// We only need to wrap if the length of the line is greater than the width of the terminal screen
 		if softwrap && StringWidth(lineStr, tabsize) > width {
@@ -168,16 +173,23 @@ func (c *CellView) Draw(buf *Buffer, colorscheme Colorscheme, top, height, left,
 			if char == '\t' {
 				charWidth := tabsize - (viewCol+left)%tabsize
 				if viewCol >= 0 {
-					c.lines[viewLine][viewCol].drawChar = indentchar
-					c.lines[viewLine][viewCol].width = charWidth
+					//overflow
+					line := c.lines[viewLine]
+					line_len := len(line)
+					if viewCol < line_len {
+						line[viewCol].drawChar = indentchar
+						c.lines[viewLine][viewCol].width = charWidth
 
-					indentStyle := curStyle
-					ch := buf.Settings["indentchar"].(string)
-					if group, ok := colorscheme["indent-char"]; ok && !IsStrWhitespace(ch) && ch != "" {
-						indentStyle = group
+						indentStyle := curStyle
+						ch := buf.Settings["indentchar"].(string)
+						if group, ok := colorscheme["indent-char"]; ok && !IsStrWhitespace(ch) && ch != "" {
+							indentStyle = group
+						}
+
+						c.lines[viewLine][viewCol].style = indentStyle
+					} else {
+						break
 					}
-
-					c.lines[viewLine][viewCol].style = indentStyle
 				}
 
 				for i := 1; i < charWidth; i++ {
