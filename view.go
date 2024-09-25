@@ -194,9 +194,9 @@ func (v *View) GetLineNoFormDraw(Y int) int {
 				break
 			}
 		}
-		n :=0
-		if string_length>width{
-		 	n=string_length / width
+		n := 0
+		if string_length > width {
+			n = string_length / width
 		}
 		ret += n
 	}
@@ -488,8 +488,16 @@ func (v *View) displayView(screen tcell.Screen) {
 				lineNumStyle = style
 			}
 			if style, ok := v.colorscheme["current-line-number"]; ok {
-				if realLineN == v.Cursor.Y && !v.Cursor.HasSelection() {
-					lineNumStyle = style
+				if realLineN == v.Cursor.Y {
+					no := !v.Cursor.HasSelection()
+					if no {
+						if v.Cursor.CurSelection[0].Y == v.Cursor.CurSelection[1].Y {
+							no = false
+						}
+					}
+					if !no {
+						lineNumStyle = style
+					}
 				}
 			}
 
@@ -568,7 +576,7 @@ func (v *View) displayView(screen tcell.Screen) {
 				v.SetCursor(&v.Buf.Cursor)
 
 				lastChar = char
-				
+
 			}
 		}
 
@@ -613,7 +621,7 @@ func (v *View) displayView(screen tcell.Screen) {
 			if style, ok := v.colorscheme["selection"]; ok {
 				selectStyle = style
 			}
-			log.Println("selection ", xOffset+visualLoc.X, yOffset+visualLoc.Y, ' ',  selectStyle)
+			log.Println("selection ", xOffset+visualLoc.X, yOffset+visualLoc.Y, ' ', selectStyle)
 			screen.SetContent(xOffset+visualLoc.X, yOffset+visualLoc.Y, ' ', nil, selectStyle)
 		}
 
