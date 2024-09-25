@@ -1,6 +1,8 @@
 package femto
 
 import (
+	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -181,7 +183,7 @@ func (v *View) GetLineNoFormDraw(Y int) int {
 	}
 	width := v.width - v.lineNumOffset
 	EndLine := min(v.Bottomline(), Y)
-	ret := v.Topline
+	ret := 0
 	for lineN := v.Topline; lineN < EndLine-1; lineN++ {
 		line := v.Buf.buf.Line(lineN)
 		string_length := len(line)
@@ -192,10 +194,13 @@ func (v *View) GetLineNoFormDraw(Y int) int {
 				break
 			}
 		}
-		n := string_length / width
+		n :=0
+		if string_length>width{
+		 	n=string_length / width
+		}
 		ret += n
 	}
-	return Y+ret
+	return Y + ret
 }
 func (v *View) VirtualLine(click_line_y, click_line_x int) (int, int) {
 	// add := 0
@@ -244,7 +249,7 @@ func (v *View) Bottomline() int {
 
 	screenX, screenY := 0, 0
 	numLines := 0
-	MaxLine := min(v.Buf.NumLines-1, v.Topline + v.height)
+	MaxLine := min(v.Buf.NumLines-1, v.Topline+v.height)
 	for lineN := v.Topline; lineN < MaxLine; lineN++ {
 		line := v.Buf.Line(lineN)
 
@@ -563,6 +568,7 @@ func (v *View) displayView(screen tcell.Screen) {
 				v.SetCursor(&v.Buf.Cursor)
 
 				lastChar = char
+				
 			}
 		}
 
@@ -607,6 +613,7 @@ func (v *View) displayView(screen tcell.Screen) {
 			if style, ok := v.colorscheme["selection"]; ok {
 				selectStyle = style
 			}
+			log.Println("selection ", xOffset+visualLoc.X, yOffset+visualLoc.Y, ' ',  selectStyle)
 			screen.SetContent(xOffset+visualLoc.X, yOffset+visualLoc.Y, ' ', nil, selectStyle)
 		}
 
@@ -618,6 +625,8 @@ func (v *View) displayView(screen tcell.Screen) {
 				style = style.Background(fg)
 				if !(!v.Cursor.HasSelection() && i == cx && yOffset+visualLineN == cy) {
 					screen.SetContent(i, yOffset+visualLineN, ' ', nil, style)
+					f, g, _ := style.Decompose()
+					log.Println("current-line", i, yOffset+visualLineN, style, fmt.Sprintf("#%d #%d", f, g))
 				}
 			}
 		}
