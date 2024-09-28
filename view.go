@@ -1,8 +1,8 @@
 package femto
 
 import (
-	"fmt"
-	"log"
+	// "fmt"
+	// "log"
 	"strconv"
 	"strings"
 	"time"
@@ -621,7 +621,7 @@ func (v *View) displayView(screen tcell.Screen) {
 			if style, ok := v.colorscheme["selection"]; ok {
 				selectStyle = style
 			}
-			log.Println("selection ", xOffset+visualLoc.X, yOffset+visualLoc.Y, ' ', selectStyle)
+			// log.Println("selection ", xOffset+visualLoc.X, yOffset+visualLoc.Y, ' ', selectStyle)
 			screen.SetContent(xOffset+visualLoc.X, yOffset+visualLoc.Y, ' ', nil, selectStyle)
 		}
 
@@ -633,8 +633,8 @@ func (v *View) displayView(screen tcell.Screen) {
 				style = style.Background(fg)
 				if !(!v.Cursor.HasSelection() && i == cx && yOffset+visualLineN == cy) {
 					screen.SetContent(i, yOffset+visualLineN, ' ', nil, style)
-					f, g, _ := style.Decompose()
-					log.Println("current-line", i, yOffset+visualLineN, style, fmt.Sprintf("#%d #%d", f, g))
+					// f, g, _ := style.Decompose()
+					// log.Println("current-line", i, yOffset+visualLineN, style, fmt.Sprintf("#%d #%d", f, g))
 				}
 			}
 		}

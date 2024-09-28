@@ -104,8 +104,9 @@ func (c *CellView) Draw(buf *Buffer, colorscheme Colorscheme, top, height, left,
 			buf.highlighter.ReHighlightLine(buf, start-1)
 			buf.lines[start-1].rehighlight = false
 		}
-
-		buf.highlighter.ReHighlightStates(buf, start)
+		if start > 0 {
+			buf.highlighter.ReHighlightStates(buf, start)
+		}
 
 		buf.highlighter.HighlightMatches(buf, top, top+height)
 	}
