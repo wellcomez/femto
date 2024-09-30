@@ -53,10 +53,10 @@ type Buffer struct {
 
 	// Buffer local settings
 	Settings map[string]interface{}
-	tree     *lspcore.TreeSitter
+	tree     lspcore.TreesiterSymbolLine
 }
 
-func (b *Buffer) SetTreesitter(tree *lspcore.TreeSitter) {
+func (b *Buffer) SetTreesitter(tree lspcore.TreesiterSymbolLine) {
 	b.tree = tree
 }
 
@@ -181,7 +181,7 @@ func (b *Buffer) updateRules(runtimeFiles *RuntimeFiles, colorScheme *Colorschem
 		if b.syntaxDef != nil {
 			b.Settings["filetype"] = b.syntaxDef.FileType
 			b.highlighter = highlight.NewHighlighter(b.syntaxDef)
-			if tree != nil {
+			if len(tree) >0 {
 				b.highlighter.Tree = tree
 			}
 			if b.Settings["syntax"].(bool) || b.highlighter != nil {
