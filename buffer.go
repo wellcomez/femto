@@ -53,11 +53,11 @@ type Buffer struct {
 
 	// Buffer local settings
 	Settings map[string]interface{}
-	tree     lspcore.TreesiterSymbolLine
+	Tree     lspcore.TreesiterSymbolLine
 }
 
 func (b *Buffer) SetTreesitter(tree lspcore.TreesiterSymbolLine) {
-	b.tree = tree
+	b.Tree = tree
 }
 
 // NewBufferFromString creates a new buffer containing the given string
@@ -176,7 +176,7 @@ func (b *Buffer) updateRules(runtimeFiles *RuntimeFiles, colorScheme *Colorschem
 		}
 		highlight.AddColoreTheme(colors)
 	}
-	tree := b.tree
+	tree := b.Tree
 	if b.highlighter == nil || rehighlight {
 		if b.syntaxDef != nil {
 			b.Settings["filetype"] = b.syntaxDef.FileType
