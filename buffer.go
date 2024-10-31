@@ -193,7 +193,12 @@ func (b *Buffer) updateRules(runtimeFiles *RuntimeFiles, colorScheme *Colorschem
 			b.highlighter.Tree = tree
 			b.highlighter.HighlightStates(b)
 		}
+	}else{
+		if b.highlighter != nil {
+			b.highlighter.Tree = tree 
+		}
 	}
+	
 }
 
 // FileType returns the buffer's filetype
