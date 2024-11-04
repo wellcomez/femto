@@ -576,6 +576,7 @@ func (v *View) displayView(screen tcell.Screen) {
 				}
 				v.SetCursor(&v.Buf.Cursor)
 
+				v.update_search_hl(char.visualLoc, char.realLoc, xOffset, yOffset, screen)
 				lastChar = char
 
 			}
@@ -641,27 +642,36 @@ func (v *View) displayView(screen tcell.Screen) {
 		}
 	}
 }
-func (v *View) get_search_hl_style(charLoc Loc) (ret *tcell.Style) {
-	if p1 := v.Buf.hl.GetPosition(charLoc.Y); len(p1) > 0 {
-		search_style := v.colorscheme.GetColor("search")
+
+//	func (v *View) get_search_hl_style(charLoc Loc) (ret *tcell.Style) {
+//		if p1 := v.Buf.hl.GetPosition(charLoc.Y); len(p1) > 0 {
+//			search_style := v.colorscheme.GetColor("search")
+//			for _, v := range p1 {
+//				if v.Begin <= charLoc.X && v.End > charLoc.X {
+//					ret = &search_style
+//				}
+//			}
+//		}
+//		return
+//	}
+func (view *View) update_search_hl(visualLoc Loc,
+	charLoc Loc, xOffset int, yOffset int, screen tcell.Screen) {
+	if p1 := view.Buf.hl.GetPosition(charLoc.Y); len(p1) > 0 {
+		search_style := view.colorscheme.GetColor("search")
+		in_search_style := view.colorscheme.GetColor("insearch")
 		for _, v := range p1 {
 			if v.Begin <= charLoc.X && v.End > charLoc.X {
-				ret = &search_style
-			}
-		}
-	}
-	return
-}
-func (v *View) update_search_hl(char *Char, charLoc Loc, xOffset int, yOffset int, screen tcell.Screen) {
-	if p1 := v.Buf.hl.GetPosition(char.realLoc.Y); len(p1) > 0 {
-		search_style := v.colorscheme.GetColor("search")
-		for _, v := range p1 {
-			if v.Begin <= charLoc.X && v.End > char.realLoc.X {
-				x := xOffset + char.visualLoc.X
-				y := yOffset + char.visualLoc.Y
+				x := xOffset + visualLoc.X
+				y := yOffset + visualLoc.Y
 				r, _, _, _ := screen.GetContent(x, y)
 				debug.DebugLogf("search_text", "%c", r)
-				screen.SetContent(x, y, r, nil, search_style)
+				if view.Cursor.HasSelection() && v.Begin >= view.Cursor.CurSelection[0].X &&
+					v.End <= view.Cursor.CurSelection[1].X &&
+					view.Cursor.CurSelection[0].Y == v.Y {
+					screen.SetContent(x, y, r, nil, in_search_style)
+				} else {
+					screen.SetContent(x, y, r, nil, search_style)
+				}
 			}
 		}
 	}
