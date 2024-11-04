@@ -9,7 +9,7 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
-	debug "zen108.com/lspvi/pkg/debug"
+	// debug "zen108.com/lspvi/pkg/debug"
 )
 
 // The View struct stores information about a view into a buffer.
@@ -658,15 +658,18 @@ func (view *View) update_search_hl(visualLoc Loc,
 	charLoc Loc, xOffset int, yOffset int, screen tcell.Screen) {
 	if p1 := view.Buf.hl.GetPosition(charLoc.Y); len(p1) > 0 {
 		search_style := view.colorscheme.GetColor("search")
-		var cur=view.Buf.highlighter.HighLights.Current
+		var cur = view.Buf.highlighter.HighLights.Current
 		in_search_style := view.colorscheme.GetColor("insearch")
+		if in_search_style == search_style {
+			in_search_style = view.colorscheme["selection"]
+		}
 		for _, v := range p1 {
 			if v.Begin <= charLoc.X && v.End > charLoc.X {
 				x := xOffset + visualLoc.X
 				y := yOffset + visualLoc.Y
 				r, _, _, _ := screen.GetContent(x, y)
-				debug.DebugLogf("search_text", "%c", r)
-				if  v==cur {
+				// debug.DebugLogf("search_text", "%c", r)
+				if v == cur {
 					screen.SetContent(x, y, r, nil, in_search_style)
 				} else {
 					screen.SetContent(x, y, r, nil, search_style)
