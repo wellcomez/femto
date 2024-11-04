@@ -542,6 +542,7 @@ func (v *View) displayView(screen tcell.Screen) {
 				}
 
 				charLoc := char.realLoc
+				point_in_selection := false
 				for _, c := range v.Buf.cursors {
 					v.SetCursor(c)
 					if v.Cursor.HasSelection() &&
@@ -552,13 +553,14 @@ func (v *View) displayView(screen tcell.Screen) {
 
 						if style, ok := v.colorscheme["selection"]; ok {
 							lineStyle = style
+							point_in_selection = true
 						}
 					}
 				}
 				v.SetCursor(&v.Buf.Cursor)
 
 				if v.Buf.Settings["cursorline"].(bool) &&
-					!v.Cursor.HasSelection() && v.Cursor.Y == realLineN {
+					!point_in_selection && v.Cursor.Y == realLineN {
 					style := v.colorscheme.GetColor("cursor-line")
 					fg, _, _ := style.Decompose()
 					lineStyle = lineStyle.Background(fg)
@@ -613,7 +615,7 @@ func (v *View) displayView(screen tcell.Screen) {
 			realLoc = Loc{0, realLineN}
 			visualLoc = Loc{0, visualLineN}
 		}
-
+		point_in_selection := false
 		if v.Cursor.HasSelection() &&
 			(realLoc.GreaterEqual(v.Cursor.CurSelection[0]) && realLoc.LessThan(v.Cursor.CurSelection[1]) ||
 				realLoc.LessThan(v.Cursor.CurSelection[0]) && realLoc.GreaterEqual(v.Cursor.CurSelection[1])) {
@@ -622,18 +624,20 @@ func (v *View) displayView(screen tcell.Screen) {
 
 			if style, ok := v.colorscheme["selection"]; ok {
 				selectStyle = style
+				point_in_selection = true
 			}
 			// log.Println("selection ", xOffset+visualLoc.X, yOffset+visualLoc.Y, ' ', selectStyle)
 			screen.SetContent(xOffset+visualLoc.X, yOffset+visualLoc.Y, ' ', nil, selectStyle)
 		}
 
 		if v.Buf.Settings["cursorline"].(bool) &&
-			!v.Cursor.HasSelection() && v.Cursor.Y == realLineN {
+			//!v.Cursor.HasSelection()
+			!point_in_selection && v.Cursor.Y == realLineN {
 			for i := lastX; i < xOffset+v.width-v.lineNumOffset; i++ {
 				style := v.colorscheme.GetColor("cursor-line")
 				fg, _, _ := style.Decompose()
 				style = style.Background(fg)
-				if !(!v.Cursor.HasSelection() && i == cx && yOffset+visualLineN == cy) {
+				if !(!point_in_selection && i == cx && yOffset+visualLineN == cy) {
 					screen.SetContent(i, yOffset+visualLineN, ' ', nil, style)
 					// f, g, _ := style.Decompose()
 					// log.Println("current-line", i, yOffset+visualLineN, style, fmt.Sprintf("#%d #%d", f, g))
