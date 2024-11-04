@@ -9,6 +9,7 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
+	debug "zen108.com/lspvi/pkg/debug"
 )
 
 // The View struct stores information about a view into a buffer.
@@ -636,6 +637,31 @@ func (v *View) displayView(screen tcell.Screen) {
 					// f, g, _ := style.Decompose()
 					// log.Println("current-line", i, yOffset+visualLineN, style, fmt.Sprintf("#%d #%d", f, g))
 				}
+			}
+		}
+	}
+}
+func (v *View) get_search_hl_style(charLoc Loc) (ret *tcell.Style) {
+	if p1 := v.Buf.hl.GetPosition(charLoc.Y); len(p1) > 0 {
+		search_style := v.colorscheme.GetColor("search")
+		for _, v := range p1 {
+			if v.Begin <= charLoc.X && v.End > charLoc.X {
+				ret = &search_style
+			}
+		}
+	}
+	return
+}
+func (v *View) update_search_hl(char *Char, charLoc Loc, xOffset int, yOffset int, screen tcell.Screen) {
+	if p1 := v.Buf.hl.GetPosition(char.realLoc.Y); len(p1) > 0 {
+		search_style := v.colorscheme.GetColor("search")
+		for _, v := range p1 {
+			if v.Begin <= charLoc.X && v.End > char.realLoc.X {
+				x := xOffset + char.visualLoc.X
+				y := yOffset + char.visualLoc.Y
+				r, _, _, _ := screen.GetContent(x, y)
+				debug.DebugLogf("search_text", "%c", r)
+				screen.SetContent(x, y, r, nil, search_style)
 			}
 		}
 	}
