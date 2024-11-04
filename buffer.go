@@ -57,6 +57,11 @@ type Buffer struct {
 	hl       hlresult.HLResult
 }
 
+func (b *Buffer) UpdateCurrent(result hlresult.MatchPosition) {
+	if b.highlighter != nil {
+		b.highlighter.UpdateCurrentPos(result)
+	}
+}
 func (b *Buffer) SetTreesitter(result hlresult.HLResult) {
 	b.hl = result
 	if b.highlighter != nil {

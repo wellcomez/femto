@@ -658,6 +658,7 @@ func (view *View) update_search_hl(visualLoc Loc,
 	charLoc Loc, xOffset int, yOffset int, screen tcell.Screen) {
 	if p1 := view.Buf.hl.GetPosition(charLoc.Y); len(p1) > 0 {
 		search_style := view.colorscheme.GetColor("search")
+		var cur=view.Buf.highlighter.HighLights.Current
 		in_search_style := view.colorscheme.GetColor("insearch")
 		for _, v := range p1 {
 			if v.Begin <= charLoc.X && v.End > charLoc.X {
@@ -665,9 +666,7 @@ func (view *View) update_search_hl(visualLoc Loc,
 				y := yOffset + visualLoc.Y
 				r, _, _, _ := screen.GetContent(x, y)
 				debug.DebugLogf("search_text", "%c", r)
-				if view.Cursor.HasSelection() && v.Begin >= view.Cursor.CurSelection[0].X &&
-					v.End <= view.Cursor.CurSelection[1].X &&
-					view.Cursor.CurSelection[0].Y == v.Y {
+				if  v==cur {
 					screen.SetContent(x, y, r, nil, in_search_style)
 				} else {
 					screen.SetContent(x, y, r, nil, search_style)
