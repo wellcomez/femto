@@ -7,7 +7,8 @@ import (
 	"unicode/utf8"
 
 	highlight "zen108.com/lspvi/pkg/highlight"
-	lspcore "zen108.com/lspvi/pkg/lsp"
+	hlresult "zen108.com/lspvi/pkg/highlight/result"
+	// lspcore "zen108.com/lspvi/pkg/lsp"
 	//"github.com/zyedidia/micro/cmd/micro/highlight"
 )
 
@@ -53,11 +54,14 @@ type Buffer struct {
 
 	// Buffer local settings
 	Settings map[string]interface{}
-	Tree     lspcore.TreesiterSymbolLine
+	hl       hlresult.HLResult
 }
 
-func (b *Buffer) SetTreesitter(tree lspcore.TreesiterSymbolLine) {
-	b.Tree = tree
+func (b *Buffer) SetTreesitter(result hlresult.HLResult) {
+	b.hl = result
+	if b.highlighter != nil {
+		b.highlighter.UpdateHLResult(result)
+	}
 }
 
 // NewBufferFromString creates a new buffer containing the given string
@@ -176,29 +180,27 @@ func (b *Buffer) updateRules(runtimeFiles *RuntimeFiles, colorScheme *Colorschem
 		}
 		highlight.AddColoreTheme(colors)
 	}
-	tree := b.Tree
+	tree := b.hl
 	if b.highlighter == nil || rehighlight {
 		if b.syntaxDef != nil {
 			b.Settings["filetype"] = b.syntaxDef.FileType
 			b.highlighter = highlight.NewHighlighter(b.syntaxDef)
-			if len(tree) >0 {
-				b.highlighter.Tree = tree
-			}
+			b.highlighter.HighLights = tree
 			if b.Settings["syntax"].(bool) || b.highlighter != nil {
 				b.highlighter.HighlightStates(b)
 			}
 		}
-		if b.highlighter == nil && tree != nil {
+		if b.highlighter == nil {
 			b.highlighter = highlight.NewHighlighter(nil)
-			b.highlighter.Tree = tree
+			b.highlighter.HighLights = tree
 			b.highlighter.HighlightStates(b)
 		}
-	}else{
+	} else {
 		if b.highlighter != nil {
-			b.highlighter.Tree = tree 
+			b.highlighter.HighLights = tree
 		}
 	}
-	
+
 }
 
 // FileType returns the buffer's filetype
