@@ -533,12 +533,14 @@ func (v *View) displayView(screen tcell.Screen) {
 		for _, char := range line {
 			if char != nil {
 				lineStyle := char.style
-
-				colorcolumn := int(v.Buf.Settings["colorcolumn"].(float64))
-				if colorcolumn != 0 && char.visualLoc.X == colorcolumn {
-					style := v.colorscheme.GetColor("color-column")
-					fg, _, _ := style.Decompose()
-					lineStyle = lineStyle.Background(fg)
+				no_color := !true
+				if no_color {
+					colorcolumn := int(v.Buf.Settings["colorcolumn"].(float64))
+					if colorcolumn != 0 && char.visualLoc.X == colorcolumn {
+						style := v.colorscheme.GetColor("color-column")
+						fg, _, _ := style.Decompose()
+						lineStyle = lineStyle.Background(fg)
+					}
 				}
 
 				charLoc := char.realLoc
@@ -548,11 +550,19 @@ func (v *View) displayView(screen tcell.Screen) {
 					if v.Cursor.HasSelection() &&
 						(charLoc.GreaterEqual(v.Cursor.CurSelection[0]) && charLoc.LessThan(v.Cursor.CurSelection[1]) ||
 							charLoc.LessThan(v.Cursor.CurSelection[0]) && charLoc.GreaterEqual(v.Cursor.CurSelection[1])) {
-						// The current character is selected
-						lineStyle = defStyle.Reverse(true)
+						if no_color {
+							// The current character is selected
+							lineStyle = defStyle.Reverse(true)
+						}
 
 						if style, ok := v.colorscheme["selection"]; ok {
-							lineStyle = style
+							_, bg, _ := style.Decompose()
+							if no_color {
+								lineStyle = style
+							} else {
+								lineStyle = lineStyle.Background(bg)
+							}
+							// lineStyle = style
 							point_in_selection = true
 						}
 					}
