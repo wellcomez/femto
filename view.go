@@ -178,7 +178,7 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	// is opened
 	v.isOverwriteMode = false
 }
-func (v *View) GetLineNoFormDraw(Y int) int {
+func (v *View) GetLineNoForDraw(Y int) int {
 	if !v.Buf.Settings["softwrap"].(bool) {
 		return Y
 	}
@@ -533,7 +533,7 @@ func (v *View) displayView(screen tcell.Screen) {
 		for _, char := range line {
 			if char != nil {
 				lineStyle := char.style
-				no_color := !true
+				no_color := true
 				if no_color {
 					colorcolumn := int(v.Buf.Settings["colorcolumn"].(float64))
 					if colorcolumn != 0 && char.visualLoc.X == colorcolumn {
