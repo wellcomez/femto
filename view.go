@@ -671,12 +671,25 @@ func (v *View) displayView(screen tcell.Screen) {
 func (view *View) update_search_hl(visualLoc Loc,
 	charLoc Loc, xOffset int, yOffset int, screen tcell.Screen) {
 	if p1 := view.Buf.hl.GetErrorPosition(charLoc.Y); len(p1) > 0 {
+		var errstyle *tcell.Style
+		for _, key := range []string{"errormsg", "error"} {
+			if s, yes := view.colorscheme[key]; yes {
+				sss := s.Attributes(tcell.AttrStrikeThrough)
+				errstyle = &sss
+				break
+			}
+		}
 		for _, v := range p1 {
 			if v.Begin <= charLoc.X && v.End > charLoc.X {
 				x := xOffset + visualLoc.X
 				y := yOffset + visualLoc.Y
-				r, _, sytle, _ := screen.GetContent(x, y)
-				screen.SetContent(x, y, r, nil, sytle.Reverse(true))
+				r, _, style, _ := screen.GetContent(x, y)
+				if errstyle != nil {
+					style = *errstyle
+				} else {
+					style = style.Attributes(tcell.AttrStrikeThrough)
+				}
+				screen.SetContent(x, y, r, nil, style)
 			}
 		}
 	}
