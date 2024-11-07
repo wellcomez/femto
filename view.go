@@ -674,7 +674,7 @@ func (view *View) update_search_hl(visualLoc Loc,
 		var errstyle *tcell.Style
 		for _, key := range []string{"errormsg", "error"} {
 			if s, yes := view.colorscheme[key]; yes {
-				sss := s.Attributes(tcell.AttrStrikeThrough)
+				sss := s.Attributes(tcell.AttrUnderline)
 				errstyle = &sss
 				break
 			}
@@ -685,10 +685,10 @@ func (view *View) update_search_hl(visualLoc Loc,
 				y := yOffset + visualLoc.Y
 				r, _, style, _ := screen.GetContent(x, y)
 				if errstyle != nil {
-					style = *errstyle
-				} else {
-					style = style.Attributes(tcell.AttrStrikeThrough)
+					f, _, _ := errstyle.Decompose()
+					style = style.Foreground(f)
 				}
+				style = style.Attributes(tcell.AttrUnderline)
 				screen.SetContent(x, y, r, nil, style)
 			}
 		}
