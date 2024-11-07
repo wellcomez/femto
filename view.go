@@ -670,7 +670,18 @@ func (v *View) displayView(screen tcell.Screen) {
 //	}
 func (view *View) update_search_hl(visualLoc Loc,
 	charLoc Loc, xOffset int, yOffset int, screen tcell.Screen) {
-	if p1 := view.Buf.hl.GetPosition(charLoc.Y); len(p1) > 0 {
+	if p1 := view.Buf.hl.GetErrorPosition(charLoc.Y); len(p1) > 0 {
+		for _, v := range p1 {
+			if v.Begin <= charLoc.X && v.End > charLoc.X {
+				x := xOffset + visualLoc.X
+				y := yOffset + visualLoc.Y
+				r, _, sytle, _ := screen.GetContent(x, y)
+				screen.SetContent(x, y, r, nil, sytle.Reverse(true))
+			}
+		}
+	}
+
+	if p1 := view.Buf.hl.GetMatchPosition(charLoc.Y); len(p1) > 0 {
 		search_style := view.colorscheme.GetColor("search")
 		var cur = view.Buf.highlighter.HighLights.Current
 		in_search_style := view.colorscheme.GetColor("insearch")

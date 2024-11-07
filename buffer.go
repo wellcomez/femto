@@ -57,6 +57,12 @@ type Buffer struct {
 	hl       hlresult.HLResult
 }
 
+func (b *Buffer) UpdatedDiagnos(result hlresult.SearchLine) {
+	b.hl.UpdateErrorPosition(result)
+	// if b.highlighter != nil {
+		// b.highlighter.UpdateDiagnos(result)
+	// }
+}
 func (b *Buffer) UpdateCurrent(result hlresult.MatchPosition) {
 	if b.highlighter != nil {
 		b.highlighter.UpdateCurrentPos(result)
