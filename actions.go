@@ -629,11 +629,11 @@ func (v *View) CutLine() bool {
 	}
 	if v.freshClip == true {
 		if v.Cursor.HasSelection() {
-			if clip, err := clipboard.ReadAll(); err != nil {
-				// do nothing
-			} else {
-				clipboard.WriteAll(clip + v.Cursor.GetSelection())
-			}
+			// if clip, err := clipboard.ReadAll(); err != nil {
+			// do nothing
+			// } else {
+			clipboard.WriteAll(v.Cursor.GetSelection())
+			// }
 		}
 	} else if time.Since(v.lastCutTime)/time.Second > 10*time.Second || v.freshClip == false {
 		v.Copy()
