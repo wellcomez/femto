@@ -568,9 +568,9 @@ func (v *View) displayView(screen tcell.Screen) {
 					}
 				}
 				v.SetCursor(&v.Buf.Cursor)
-
+				sel := v.Cursor.CurSelection
 				if v.Buf.Settings["cursorline"].(bool) &&
-					!point_in_selection && v.Cursor.Y == realLineN {
+					!point_in_selection && v.Cursor.Y == realLineN && sel[0].Y == sel[1].Y {
 					style := v.colorscheme.GetColor("cursor-line")
 					fg, _, _ := style.Decompose()
 					lineStyle = lineStyle.Background(fg)
@@ -643,14 +643,17 @@ func (v *View) displayView(screen tcell.Screen) {
 		if v.Buf.Settings["cursorline"].(bool) &&
 			//!v.Cursor.HasSelection()
 			!point_in_selection && v.Cursor.Y == realLineN {
-			for i := lastX; i < xOffset+v.width-v.lineNumOffset; i++ {
-				style := v.colorscheme.GetColor("cursor-line")
-				fg, _, _ := style.Decompose()
-				style = style.Background(fg)
-				if !(!point_in_selection && i == cx && yOffset+visualLineN == cy) {
-					screen.SetContent(i, yOffset+visualLineN, ' ', nil, style)
-					// f, g, _ := style.Decompose()
-					// log.Println("current-line", i, yOffset+visualLineN, style, fmt.Sprintf("#%d #%d", f, g))
+			sel := v.Cursor.CurSelection
+			if sel[0].Y == sel[1].Y {
+				for i := lastX; i < xOffset+v.width-v.lineNumOffset; i++ {
+					style := v.colorscheme.GetColor("cursor-line")
+					fg, _, _ := style.Decompose()
+					style = style.Background(fg)
+					if !(!point_in_selection && i == cx && yOffset+visualLineN == cy) {
+						screen.SetContent(i, yOffset+visualLineN, ' ', nil, style)
+						// f, g, _ := style.Decompose()
+						// log.Println("current-line", i, yOffset+visualLineN, style, fmt.Sprintf("#%d #%d", f, g))
+					}
 				}
 			}
 		}
