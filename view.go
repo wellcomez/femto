@@ -697,10 +697,15 @@ func (view *View) update_search_hl(visualLoc Loc,
 	if p1 := view.Buf.hl.GetMatchPosition(charLoc.Y); len(p1) > 0 {
 		search_style := view.colorscheme.GetColor("search")
 		var cur = view.Buf.highlighter.HighLights.Current
-		in_search_style := view.colorscheme.GetColor("incsearch")
-		if in_search_style == search_style {
-			in_search_style = view.colorscheme["selection"]
+		var in_search_style tcell.Style
+		if s, ok := view.colorscheme["incsearch"]; ok {
+			in_search_style = s
+		} else {
+			in_search_style = search_style
 		}
+		//		if in_search_style == search_style {
+		//			in_search_style = view.colorscheme["selection"]
+		//		}
 		for _, v := range p1 {
 			if v.Begin <= charLoc.X && v.End > charLoc.X {
 				x := xOffset + visualLoc.X
